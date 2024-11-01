@@ -39,13 +39,13 @@ def get_sentence_embedding_bert(sentence: str) -> torch.Tensor:
 
 
 def get_sentence_embedding_sbert(sentence: str) -> torch.Tensor:
+    model_sbert.cuda()
     encoded_input = tokenizer_sbert(
         sentence, padding=True, truncation=True, max_length=24, return_tensors="pt"
-    )
+    ).to("cuda")
 
     with torch.no_grad():
         model_output = model_sbert(**encoded_input)
+        sentence_embeddings = mean_pooling(model_output, encoded_input["attention_mask"])
 
-    sentence_embeddings = mean_pooling(model_output, encoded_input["attention_mask"])
-
-    return sentence_embeddings
+    return sentence_embeddings.cpu().numpy()
